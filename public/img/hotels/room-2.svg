@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <rect width="800" height="500" fill="#E8F0FE"/>
+  <rect x="50" y="50" width="700" height="400" fill="#FFFFFF" rx="8" stroke="#E3DFD6" stroke-width="2"/>
+  <rect x="100" y="150" width="600" height="240" fill="#F5F3EE" rx="6"/>
+  <circle cx="400" cy="220" r="40" fill="#1F5FA8" opacity="0.3"/>
+  <text x="400" y="290" font-family="sans-serif" font-size="20" font-weight="bold" fill="#14181F" text-anchor="middle">Executive Suite & Balcony</text>
+  <text x="400" y="320" font-family="sans-serif" font-size="14" fill="#5B6472" text-anchor="middle">City Skyline View</text>
+</svg>

@@ -1,0 +1,422 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String             @id @default(cuid())
+  name            String
+  email           String             @unique
+  passwordHash    String
+  phone           String?
+  role            String             @default("TRAVELLER") // TRAVELLER | ADMIN
+  walletBalance   Float              @default(0)
+  createdAt       DateTime           @default(now())
+  savedTravellers SavedTraveller[]
+  bookings        Booking[]
+  checkoutSessions CheckoutSession[]
+  trips           Trip[]
+  priceAlerts     PriceAlert[]
+  walletTxns      WalletTransaction[]
+  notifications   Notification[]
+  recentSearches  RecentSearch[]
+}
+
+model SavedTraveller {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  dob             DateTime?
+  gender          String?   // M | F | O
+  idType          String?   // AADHAAR | PASSPORT | VOTER_ID
+  idNumber        String?
+  nationality     String    @default("IN")
+  berthPreference String?   // LOWER | UPPER | MIDDLE | SIDE_LOWER | SIDE_UPPER
+  createdAt       DateTime  @default(now())
+}
+
+model Airport {
+  code      String   @id // IATA e.g. DEL, BOM
+  name      String
+  city      String
+  country   String   @default("IN")
+  createdAt DateTime @default(now())
+
+  @@index([city])
+}
+
+model Station {
+  code      String   @id // Station code e.g. NDLS, BCT
+  name      String
+  city      String
+  state     String
+  createdAt DateTime @default(now())
+
+  @@index([city])
+  @@index([name])
+}
+
+model City {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  state     String
+  createdAt DateTime @default(now())
+  busesFrom Bus[]    @relation("BusFromCity")
+  busesTo   Bus[]    @relation("BusToCity")
+  hotels    Hotel[]
+
+  @@index([name])
+}
+
+model Airline {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique // e.g. SL, DW
+  flights   Flight[]
+  createdAt DateTime @default(now())
+}
+
+model BusOperator {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  buses     Bus[]
+  createdAt DateTime @default(now())
+}
+
+model Flight {
+  id          String           @id @default(cuid())
+  airlineId   String
+  airline     Airline          @relation(fields: [airlineId], references: [id])
+  number      String           // e.g. SL-102
+  fromCode    String
+  toCode      String
+  departTime  String           // HH:mm in IST e.g. 06:15
+  arriveTime  String           // HH:mm in IST e.g. 08:30
+  durationMin Int
+  stops       Int              @default(0)
+  baseFare    Float
+  baggage     String           // "15 kg Check-in, 7 kg Cabin"
+  refundable  Boolean          @default(false)
+  aircraft    String?          // A320, B737
+  createdAt   DateTime         @default(now())
+  instances   FlightInstance[]
+
+  @@index([fromCode, toCode])
+  @@index([fromCode])
+  @@index([toCode])
+}
+
+model FlightInstance {
+  id              String   @id @default(cuid())
+  flightId        String
+  flight          Flight   @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  date            String   // YYYY-MM-DD
+  seatsLeft       Int
+  priceMultiplier Float    @default(1.0)
+
+  @@unique([flightId, date])
+  @@index([date])
+}
+
+model Train {
+  number          String              @id // e.g. "12952"
+  name            String              // e.g. "Mumbai Rajdhani"
+  type            String              // RAJDHANI | SHATABDI | EXPRESS | SUPERFAST | DURONTO
+  runsOnBitmask   Int                 @default(127) // Bitmask for 7 days (Sun=1, Mon=2, etc.)
+  stops           TrainStop[]
+  classFares      TrainClassFare[]
+  availability    TrainAvailability[]
+  createdAt       DateTime            @default(now())
+}
+
+model TrainStop {
+  id          String   @id @default(cuid())
+  trainNumber String
+  train       Train    @relation(fields: [trainNumber], references: [number], onDelete: Cascade)
+  stationCode String
+  seq         Int
+  arrival     String?  // HH:mm
+  departure   String?  // HH:mm
+  dayOffset   Int      @default(0)
+  distanceKm  Int      @default(0)
+
+  @@index([trainNumber])
+  @@index([stationCode])
+}
+
+model TrainClassFare {
+  id          String @id @default(cuid())
+  trainNumber String
+  train       Train  @relation(fields: [trainNumber], references: [number], onDelete: Cascade)
+  fromStation String
+  toStation   String
+  classCode   String // 1A | 2A | 3A | SL | CC | 2S
+  fare        Float
+
+  @@index([trainNumber, fromStation, toStation])
+}
+
+model TrainAvailability {
+  id          String @id @default(cuid())
+  trainNumber String
+  train       Train  @relation(fields: [trainNumber], references: [number], onDelete: Cascade)
+  date        String // YYYY-MM-DD
+  classCode   String // 1A | 2A | 3A | SL | CC | 2S
+  quota       String @default("GN") // GN | TQ (Tatkal) | LD (Ladies)
+  status      String // AVL | RAC | WL | REGRET
+  count       Int    // available seat count or RAC/WL number
+
+  @@unique([trainNumber, date, classCode, quota])
+  @@index([trainNumber, date])
+  @@index([date])
+}
+
+model Bus {
+  id          String        @id @default(cuid())
+  operatorId  String
+  operator    BusOperator   @relation(fields: [operatorId], references: [id])
+  type        String        // "AC Sleeper (2+1)", "Volvo Multi-Axle AC", "BharatBenz AC Seater"
+  fromCityId  String
+  fromCity    City          @relation("BusFromCity", fields: [fromCityId], references: [id])
+  toCityId    String
+  toCity      City          @relation("BusToCity", fields: [toCityId], references: [id])
+  departTime  String        // HH:mm
+  arriveTime  String        // HH:mm
+  baseFare    Float
+  rating      Float         @default(4.2)
+  layoutJson  String        // Lower deck, upper deck seat matrix
+  instances   BusInstance[]
+  busPoints   BusPoint[]
+  createdAt   DateTime      @default(now())
+
+  @@index([fromCityId, toCityId])
+}
+
+model BusInstance {
+  id          String   @id @default(cuid())
+  busId       String
+  bus         Bus      @relation(fields: [busId], references: [id], onDelete: Cascade)
+  date        String   // YYYY-MM-DD
+  bookedSeats String   @default("[]") // JSON array of booked seat identifiers e.g. ["L1", "U4"]
+
+  @@unique([busId, date])
+  @@index([date])
+}
+
+model BusPoint {
+  id        String @id @default(cuid())
+  busId     String
+  bus       Bus    @relation(fields: [busId], references: [id], onDelete: Cascade)
+  type      String // BOARDING | DROPPING
+  name      String // Locality name e.g. "Kashmere Gate Metro Gate 1"
+  time      String // HH:mm
+}
+
+model Hotel {
+  id          String        @id @default(cuid())
+  name        String
+  cityId      String
+  city        City          @relation(fields: [cityId], references: [id])
+  locality    String
+  stars       Int           @default(3)
+  rating      Float         @default(4.0)
+  amenities   String        // JSON array: ["WiFi", "Pool", "Breakfast", "AC", "Parking"]
+  description String
+  images      String        // JSON array of local image paths in /img/hotels/
+  policies    String        // JSON: checkIn, checkOut, cancelHours
+  rooms       Room[]
+  reviews     HotelReview[]
+  createdAt   DateTime      @default(now())
+
+  @@index([cityId])
+}
+
+model Room {
+  id              String @id @default(cuid())
+  hotelId         String
+  hotel           Hotel  @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  type            String // Deluxe Room, Executive Suite, Club Twin
+  capacity        Int    @default(2)
+  basePrice       Float
+  inventoryPerDay Int    @default(10)
+}
+
+model HotelReview {
+  id        String   @id @default(cuid())
+  hotelId   String
+  hotel     Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  author    String
+  rating    Float
+  text      String
+  date      DateTime @default(now())
+}
+
+model CheckoutSession {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mode           String   // FLIGHT | TRAIN | BUS | HOTEL
+  payloadJson    String   // Full itinerary selection, passengers, add-ons
+  priceSnapshot  String   // JSON { base, taxes, fees, discount, total }
+  expiresAt      DateTime // Lock expiration (10 minutes)
+  status         String   @default("ACTIVE") // ACTIVE | EXPIRED | COMPLETED
+  idempotencyKey String   @unique
+  createdAt      DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Booking {
+  id          String             @id @default(cuid())
+  userId      String
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mode        String             // FLIGHT | TRAIN | BUS | HOTEL
+  status      String             @default("CONFIRMED") // PENDING | CONFIRMED | CANCELLED | FAILED | COMPLETED
+  pnr         String?            // 10-digit PNR for Train/Flight
+  totalAmount Float
+  taxes       Float              @default(0)
+  fees        Float              @default(0)
+  discount    Float              @default(0)
+  promoCode   String?
+  tripId      String?
+  trip        Trip?              @relation(fields: [tripId], references: [id])
+  metadataJson String?           // Mode specific snapshot e.g. dates, route, hotel details
+  createdAt   DateTime           @default(now())
+  passengers  BookingPassenger[]
+  payments    Payment[]
+  refunds     Refund[]
+
+  @@index([userId])
+  @@index([pnr])
+  @@index([status])
+}
+
+model BookingPassenger {
+  id           String  @id @default(cuid())
+  bookingId    String
+  booking      Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  name         String
+  age          Int?
+  gender       String?
+  seat         String? // e.g. "14B" or "L12"
+  berth        String? // e.g. "B1-23 (Lower)"
+  ticketStatus String  @default("CNF") // CNF | RAC | WL
+}
+
+model Payment {
+  id         String   @id @default(cuid())
+  bookingId  String
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  method     String   // UPI | CARD | NETBANKING | WALLET
+  status     String   @default("SUCCESS") // PENDING | SUCCESS | FAILED
+  gatewayRef String?  // e.g. "PAY_WF_9482910"
+  amount     Float
+  scenario   String   @default("success") // success | failure | pending
+  createdAt  DateTime @default(now())
+
+  @@index([bookingId])
+}
+
+model Refund {
+  id                 String   @id @default(cuid())
+  bookingId          String
+  booking            Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount             Float
+  destination        String   @default("WALLET") // WALLET | ORIGINAL_PAYMENT
+  status             String   @default("COMPLETED") // PENDING | COMPLETED | FAILED
+  computedFromPolicy String?  // Details of deductions & tier applied
+  createdAt          DateTime @default(now())
+
+  @@index([bookingId])
+}
+
+model Trip {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  bookings  Booking[]
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model PriceAlert {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mode        String    // FLIGHT | BUS
+  routeJson   String    // { from, to, date }
+  targetPrice Float
+  status      String    @default("ACTIVE") // ACTIVE | TRIGGERED | DISMISSED
+  triggeredAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model PriceHistory {
+  id       String   @id @default(cuid())
+  mode     String   // FLIGHT | BUS
+  routeKey String   // e.g. "DEL-BOM" or "BLR-HYD"
+  date     String   // YYYY-MM-DD
+  minPrice Float
+
+  @@index([mode, routeKey])
+  @@index([date])
+}
+
+model PromoCode {
+  code        String    @id
+  type        String    // PERCENTAGE | FLAT
+  value       Float     // 10% or 500 flat
+  minAmount   Float     @default(0)
+  maxDiscount Float?
+  modes       String    @default("[]") // JSON array e.g. ["FLIGHT", "TRAIN", "BUS", "HOTEL"]
+  validFrom   DateTime
+  validTo     DateTime
+  usageLimit  Int?
+  usedCount   Int       @default(0)
+}
+
+model WalletTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // CREDIT | DEBIT | REFUND
+  amount    Float
+  ref       String?  // Booking ID or note
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String    // BOOKING | ALERT | TRAIN_DELAY | WALLET
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model RecentSearch {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mode       String   // FLIGHT | TRAIN | BUS | HOTEL
+  paramsJson String   // JSON string of search params
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}

@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #14181F;
+  --ink-muted: #5B6472;
+  --surface: #FFFFFF;
+  --canvas: #F8F7F4;
+  --line: #E2DDD5;
+  --line-subtle: #EDE9E3;
+  --brand: #E8590C;
+  --brand-hover: #D04F0A;
+  --brand-light: #FFF4ED;
+  --brand-ink: #B24508;
+  --accent: #0B5D63;
+  --ok: #1E7B4B;
+  --ok-light: #EBF7EE;
+  --warn: #B7791F;
+  --warn-light: #FEF7EA;
+  --danger: #B42318;
+  --danger-light: #FEECEB;
+  --info: #1F5FA8;
+  --info-light: #EEF4FC;
+
+  --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background-color: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Tabular numerals for prices, times, PNRs, train numbers */
+.num-tabular,
+.font-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Accessible focus ring */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* Subtle dropdown & card shadows */
+.shadow-card {
+  box-shadow: 0 1px 3px rgba(20, 24, 31, 0.05), 0 1px 2px rgba(20, 24, 31, 0.03);
+}
+
+.shadow-card-hover {
+  box-shadow: 0 4px 12px rgba(20, 24, 31, 0.08), 0 2px 4px rgba(20, 24, 31, 0.04);
+}
+
+.shadow-dropdown {
+  box-shadow: 0 10px 25px -5px rgba(20, 24, 31, 0.1), 0 8px 10px -6px rgba(20, 24, 31, 0.06);
+}
+
+/* Custom hairline borders */
+.border-line {
+  border-color: var(--line);
+}
+
+/* Smooth micro-interactions */
+.card-interactive {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.card-interactive:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(20, 24, 31, 0.07);
+}
+
+/* Custom scrollbars for clean UI */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--canvas);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-muted);
+}
