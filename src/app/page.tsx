@@ -68,12 +68,6 @@ export default function HomePage() {
           <span className="font-semibold text-[var(--ink)]">Network Active:</span>
           <span>40 Airport Hubs · 40 Rail Terminals · 190 Bus Lines · 150 Hotels</span>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-            100% Offline Ready
-          </span>
-          <span className="hidden md:inline">Mulberry32 PRNG Seeded</span>
-        </div>
       </div>
 
       {/* Main Booking Engine Console */}
