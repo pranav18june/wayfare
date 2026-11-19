@@ -100,6 +100,111 @@ export default function HomePage() {
         </section>
       )}
 
+      {/* Platform Innovations: What Traditional OTAs Lack */}
+      <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-6 shadow-card space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--line)] pb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-mono uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-orange-100 text-[var(--brand-ink)]">
+                Differentiating Pillars
+              </span>
+            </div>
+            <h2 className="text-base font-bold text-[var(--ink)]">
+              Wayfare Innovations — Beyond Standard Travel Search
+            </h2>
+            <p className="text-xs text-[var(--ink-muted)]">
+              Engineered to resolve structural gaps that legacy travel apps still struggle with.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Trip Mode */}
+          <Link
+            href="/trips/live"
+            className="group p-4 rounded-xl border border-[var(--line)] bg-[var(--canvas)] hover:border-[var(--brand)] hover:shadow-xs transition-all flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-8 h-8 rounded-lg bg-[var(--ink)] text-white flex items-center justify-center mb-3 group-hover:bg-[var(--brand)] transition-colors">
+                <Compass className="w-4 h-4 text-orange-300 group-hover:text-white" />
+              </div>
+              <h3 className="font-bold text-sm text-[var(--ink)] mb-1">
+                Trip Mode Companion
+              </h3>
+              <p className="text-xs text-[var(--ink-muted)] leading-relaxed">
+                Day-of travel safety hub with live departure countdown, NTES running status, and offline PDF ticket access.
+              </p>
+            </div>
+            <span className="mt-4 text-xs font-semibold text-[var(--brand)] flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+              Open Trip Mode →
+            </span>
+          </Link>
+
+          {/* Card 2: Group Split */}
+          <Link
+            href="/group"
+            className="group p-4 rounded-xl border border-[var(--line)] bg-[var(--canvas)] hover:border-[var(--brand)] hover:shadow-xs transition-all flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-8 h-8 rounded-lg bg-[var(--ink)] text-white flex items-center justify-center mb-3 group-hover:bg-[var(--brand)] transition-colors">
+                <Ticket className="w-4 h-4 text-orange-300 group-hover:text-white" />
+              </div>
+              <h3 className="font-bold text-sm text-[var(--ink)] mb-1">
+                Group Split Booking
+              </h3>
+              <p className="text-xs text-[var(--ink-muted)] leading-relaxed">
+                Collaborative trip canvas with WhatsApp invite links, decentralized traveler manifests, and split payments.
+              </p>
+            </div>
+            <span className="mt-4 text-xs font-semibold text-[var(--brand)] flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+              Explore Group Split →
+            </span>
+          </Link>
+
+          {/* Card 3: True All-In Price */}
+          <Link
+            href="/flights/results?from=DEL&to=BOM&date=2026-11-22&allin=1"
+            className="group p-4 rounded-xl border border-[var(--line)] bg-[var(--canvas)] hover:border-[var(--brand)] hover:shadow-xs transition-all flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-8 h-8 rounded-lg bg-[var(--ink)] text-white flex items-center justify-center mb-3 group-hover:bg-[var(--brand)] transition-colors">
+                <ShieldCheck className="w-4 h-4 text-orange-300 group-hover:text-white" />
+              </div>
+              <h3 className="font-bold text-sm text-[var(--ink)] mb-1">
+                True All-In Pricing
+              </h3>
+              <p className="text-xs text-[var(--ink-muted)] leading-relaxed">
+                Zero drip pricing. Toggle all-inclusive rates (GST + convenience fees + baggage) on all search result cards.
+              </p>
+            </div>
+            <span className="mt-4 text-xs font-semibold text-[var(--brand)] flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+              See Live Demo →
+            </span>
+          </Link>
+
+          {/* Card 4: Travel Intelligence Profile */}
+          <Link
+            href="/profile#preferences"
+            className="group p-4 rounded-xl border border-[var(--line)] bg-[var(--canvas)] hover:border-[var(--brand)] hover:shadow-xs transition-all flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-8 h-8 rounded-lg bg-[var(--ink)] text-white flex items-center justify-center mb-3 group-hover:bg-[var(--brand)] transition-colors">
+                <TrendingUp className="w-4 h-4 text-orange-300 group-hover:text-white" />
+              </div>
+              <h3 className="font-bold text-sm text-[var(--ink)] mb-1">
+                Booking Intelligence
+              </h3>
+              <p className="text-xs text-[var(--ink-muted)] leading-relaxed">
+                Save personal seat, berth, bus type, and budget limits that automatically re-rank and filter search results.
+              </p>
+            </div>
+            <span className="mt-4 text-xs font-semibold text-[var(--brand)] flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+              Configure Profile →
+            </span>
+          </Link>
+        </div>
+      </section>
+
       {/* High-Frequency Transit Sectors Table */}
       <section className="rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-6 shadow-card">
         <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--line)] pb-4">

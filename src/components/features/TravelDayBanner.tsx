@@ -54,33 +54,39 @@ export function TravelDayBanner() {
       : Hotel;
 
   return (
-    <div className="w-full bg-[var(--ink)] text-white border-b border-[var(--line)] py-2.5 px-4">
-      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-sm">
-        <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-mono font-semibold uppercase bg-[var(--brand)] text-white tracking-wider">
-            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-            Travel Day
-          </span>
-          <div className="flex items-center gap-2">
-            <ModeIcon className="w-4 h-4 text-orange-300" />
-            <span className="font-medium text-white">{booking.route}</span>
-            <span className="text-white/60 text-xs hidden md:inline">
-              Departure: {booking.departTime} ({booking.departDate})
-            </span>
-            {booking.pnr && (
-              <span className="font-mono text-xs px-2 py-0.5 bg-white/10 rounded text-orange-200">
-                PNR: {booking.pnr}
+    <div className="w-full bg-gradient-to-r from-[var(--ink)] to-slate-900 text-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-700/50">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-[var(--brand)] text-white flex items-center justify-center shrink-0 shadow-xs">
+            <ModeIcon className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-orange-500/20 text-orange-300 border border-orange-500/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+                Live Travel Day Alert
               </span>
-            )}
+              <span className="font-bold text-white text-sm sm:text-base">
+                {booking.route}
+              </span>
+              {booking.pnr && (
+                <span className="font-mono text-xs px-2 py-0.5 bg-white/10 rounded text-orange-200">
+                  PNR: {booking.pnr}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-white/70 mt-1 font-mono">
+              Scheduled Departure: {booking.departTime} on {booking.departDate} · {booking.passengers} Traveler(s)
+            </p>
           </div>
         </div>
 
         <Link
           href="/trips/live"
-          className="inline-flex items-center gap-1 text-xs font-medium text-orange-300 hover:text-white transition-colors bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg border border-white/10"
+          className="inline-flex items-center gap-2 text-xs font-bold text-white bg-[var(--brand)] hover:bg-[#d04f0a] px-4 py-2.5 rounded-xl transition-all shadow-xs self-stretch sm:self-auto justify-center"
         >
-          Open Trip Mode
-          <ArrowRight className="w-3.5 h-3.5" />
+          <span>Open Trip Mode</span>
+          <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
     </div>
