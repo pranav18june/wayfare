@@ -109,29 +109,29 @@ function RunningStatusContent() {
 
         {error && <p className="mt-2 text-xs text-[var(--danger)]">{error}</p>}
 
-        <div className="mt-3 flex items-center gap-2 text-[11px] text-[var(--ink-muted)]">
-          <span>Popular Trains:</span>
-          <button
-            type="button"
-            onClick={() => {
-              setTrainInput("12952");
-              handleLookup("12952", dateInput);
-            }}
-            className="font-mono text-[var(--accent)] hover:underline"
-          >
-            12952 (Mumbai Rajdhani)
-          </button>
-          <span>•</span>
-          <button
-            type="button"
-            onClick={() => {
-              setTrainInput("12004");
-              handleLookup("12004", dateInput);
-            }}
-            className="font-mono text-[var(--accent)] hover:underline"
-          >
-            12004 (Shatabdi)
-          </button>
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-[var(--ink-muted)]">
+          <span className="font-semibold text-[var(--ink)]">Popular Trains:</span>
+          {[
+            { num: "15160", label: "15160 (Sarnath Exp)" },
+            { num: "12952", label: "12952 (Mumbai Rajdhani)" },
+            { num: "12004", label: "12004 (LKO Shatabdi)" },
+            { num: "12302", label: "12302 (HWH Rajdhani)" },
+            { num: "12124", label: "12124 (Deccan Queen)" },
+          ].map((pt, idx) => (
+            <span key={pt.num} className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setTrainInput(pt.num);
+                  handleLookup(pt.num, dateInput);
+                }}
+                className="font-mono text-[var(--brand)] hover:underline bg-[var(--canvas)] px-2 py-0.5 rounded border border-[var(--line)]"
+              >
+                {pt.label}
+              </button>
+              {idx < 4 && <span>•</span>}
+            </span>
+          ))}
         </div>
       </div>
 

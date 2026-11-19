@@ -245,8 +245,14 @@ export class MockTrainProvider implements TrainProvider {
     trainNumber: string,
     date?: string
   ): Promise<LiveRunningStatusResult | null> {
-    const train = await prisma.train.findUnique({
-      where: { number: trainNumber },
+    const cleanQuery = trainNumber.trim();
+    let train = await prisma.train.findFirst({
+      where: {
+        OR: [
+          { number: cleanQuery },
+          { name: { contains: cleanQuery } },
+        ],
+      },
       include: {
         stops: {
           orderBy: { seq: "asc" },
@@ -254,7 +260,40 @@ export class MockTrainProvider implements TrainProvider {
       },
     });
 
-    if (!train || train.stops.length === 0) return null;
+    // If train is not in the seeded DB, generate a realistic dynamic route for any 4-5 digit train
+    if (!train || train.stops.length === 0) {
+      const numOnly = cleanQuery.replace(/\D/g, "");
+      if (numOnly.length >= 4) {
+        const fallbackStations = [
+          { code: "NDLS", name: "New Delhi", arr: null, dep: "06:15", dist: 0 },
+          { code: "CNB", name: "Kanpur Central", arr: "11:20", dep: "11:30", dist: 440 },
+          { code: "PRYJ", name: "Prayagraj Junction", arr: "14:05", dep: "14:15", dist: 635 },
+          { code: "DDU", name: "Pt. Deen Dayal Upadhyaya", arr: "16:40", dep: "16:50", dist: 788 },
+          { code: "PNBE", name: "Patna Junction", arr: "20:30", dep: null, dist: 998 },
+        ];
+        train = {
+          number: numOnly,
+          name: `Express Transit #${numOnly}`,
+          type: "SUPERFAST",
+          runsOnBitmask: 127,
+          createdAt: new Date(),
+          stops: fallbackStations.map((st, idx) => ({
+            id: `fb_${numOnly}_${idx}`,
+            trainNumber: numOnly,
+            stationCode: st.code,
+            seq: idx + 1,
+            arrival: st.arr,
+            departure: st.dep,
+            dayOffset: 0,
+            distanceKm: st.dist,
+          })),
+        } as any;
+      } else {
+        return null;
+      }
+    }
+
+    if (!train) return null;
 
     // Fetch station names
     const stationCodes = train.stops.map((s) => s.stationCode);
