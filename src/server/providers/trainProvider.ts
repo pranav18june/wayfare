@@ -11,6 +11,7 @@ import {
 } from "./types";
 import { estimateTrainConfirmationProbability } from "@/lib/domain/availability";
 import { format, parseISO } from "date-fns";
+import { fetchLiveRailwayStatus } from "./liveTrainTracker";
 
 export interface TrainProvider {
   search(q: TrainQuery): Promise<TrainResult[]>;
@@ -246,6 +247,18 @@ export class MockTrainProvider implements TrainProvider {
     date?: string
   ): Promise<LiveRunningStatusResult | null> {
     const cleanQuery = trainNumber.trim();
+
+    // 1. Attempt real-time live railway status from NTES / RailRadar
+    try {
+      const realStatus = await fetchLiveRailwayStatus(cleanQuery, date);
+      if (realStatus && realStatus.timeline && realStatus.timeline.length > 0) {
+        return realStatus;
+      }
+    } catch (e) {
+      console.warn("[TrainProvider] Live external tracking fallback triggered:", e);
+    }
+
+    // 2. Fallback to local DB / deterministic route
     let train = await prisma.train.findFirst({
       where: {
         OR: [
