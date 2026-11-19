@@ -2,16 +2,22 @@ import { HotelResult } from "@/server/providers/types";
 import { formatINR } from "@/lib/utils/formatters";
 import { Star, MapPin, Check, Wifi, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { allInPrice } from "@/lib/domain/pricing";
+import { GroupBookingButton } from "@/components/features/GroupBookingButton";
 
 interface HotelCardProps {
   hotel: HotelResult;
   checkIn: string;
   checkOut: string;
   nights: number;
+  allIn?: boolean;
 }
 
-export function HotelCard({ hotel, checkIn, checkOut, nights }: HotelCardProps) {
-  const totalPrice = hotel.startingPrice * nights;
+export function HotelCard({ hotel, checkIn, checkOut, nights, allIn = false }: HotelCardProps) {
+  const effectiveStarting = allIn
+    ? allInPrice(hotel.startingPrice, "HOTEL")
+    : hotel.startingPrice;
+  const totalPrice = effectiveStarting * nights;
   const imageSrc = hotel.images[0] || "/img/hotels/room-1.svg";
 
   return (
@@ -75,16 +81,16 @@ export function HotelCard({ hotel, checkIn, checkOut, nights }: HotelCardProps) 
         </div>
 
         {/* Price & View Rooms CTA */}
-        <div className="flex items-center justify-between sm:col-span-3 sm:flex-col sm:items-end sm:justify-center border-t sm:border-t-0 border-[var(--line)] pt-3 sm:pt-0">
+        <div className="flex items-center justify-between sm:col-span-3 sm:flex-col sm:items-end sm:justify-center border-t sm:border-t-0 border-[var(--line)] pt-3 sm:pt-0 gap-2">
           <div className="text-left sm:text-right">
             <span className="text-[11px] text-[var(--ink-muted)] block font-mono">
               Starting from
             </span>
             <div className="font-mono text-xl font-bold text-[var(--ink)]">
-              {formatINR(hotel.startingPrice)}
+              {formatINR(effectiveStarting)}
             </div>
             <span className="text-[10px] text-[var(--ink-muted)] block font-mono">
-              per night · excl. taxes
+              {allIn ? "per night · taxes & fees incl." : "per night · excl. taxes"}
             </span>
             {nights > 1 && (
               <div className="text-[11px] font-mono font-semibold text-[var(--ink-muted)] mt-1">
@@ -93,13 +99,22 @@ export function HotelCard({ hotel, checkIn, checkOut, nights }: HotelCardProps) 
             )}
           </div>
 
-          <Link
-            href={`/hotels/${hotel.id}?checkIn=${checkIn}&checkOut=${checkOut}`}
-            className="mt-3 flex items-center justify-center gap-1.5 rounded-lg bg-[var(--brand)] px-5 py-2 text-xs font-semibold text-white transition-all hover:bg-[var(--brand-hover)] active:scale-[0.98] shadow-xs"
-          >
-            <span>View Rooms</span>
-            <ArrowRight size={14} />
-          </Link>
+          <div className="flex items-center gap-1.5 sm:flex-col sm:w-full sm:items-end">
+            <Link
+              href={`/hotels/${hotel.id}?checkIn=${checkIn}&checkOut=${checkOut}`}
+              className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-[var(--brand)] px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-[var(--brand-hover)] active:scale-[0.98] shadow-xs"
+            >
+              <span>View Rooms</span>
+              <ArrowRight size={14} />
+            </Link>
+
+            <GroupBookingButton
+              mode="HOTEL"
+              selectedItem={hotel}
+              pricePerHead={effectiveStarting}
+              className="w-full"
+            />
+          </div>
         </div>
       </div>
     </div>

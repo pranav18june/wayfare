@@ -7,12 +7,15 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import { ChevronDown, ChevronUp, Calendar, Clock, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
+import { allInPrice } from "@/lib/domain/pricing";
+import { GroupBookingButton } from "@/components/features/GroupBookingButton";
 
 interface TrainCardProps {
   train: TrainResult;
   searchDate: string;
   quota: string;
   onBookClass: (train: TrainResult, classItem: TrainClassAvailability) => void;
+  allIn?: boolean;
 }
 
 export function TrainCard({
@@ -20,6 +23,7 @@ export function TrainCard({
   searchDate,
   quota,
   onBookClass,
+  allIn = false,
 }: TrainCardProps) {
   const [selectedClass, setSelectedClass] = useState<TrainClassAvailability | null>(null);
   const [expansionData, setExpansionData] = useState<
@@ -164,7 +168,7 @@ export function TrainCard({
                     {cls.classCode}
                   </span>
                   <span className="font-mono text-xs font-bold text-[var(--ink)]">
-                    {formatINR(cls.fare)}
+                    {formatINR(allIn ? allInPrice(cls.fare, "TRAIN") : cls.fare)}
                   </span>
                 </div>
 
@@ -247,16 +251,33 @@ export function TrainCard({
           {/* Direct Book CTA for Selected Class */}
           <div className="mt-5 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[var(--line)] pt-4">
             <span className="text-xs text-[var(--ink-muted)]">
-              Base Fare: <strong className="font-mono font-bold text-[var(--ink)]">{formatINR(selectedClass.fare)}</strong> per passenger (IRCTC statutory charges included)
+              {allIn ? "All-In Price" : "Base Fare"}: <strong className="font-mono font-bold text-[var(--ink)]">
+                {formatINR(allIn ? allInPrice(selectedClass.fare, "TRAIN") : selectedClass.fare)}
+              </strong> per passenger {allIn ? "(5% GST & IRCTC portal fees incl.)" : "(taxes at checkout)"}
             </span>
-            <button
-              type="button"
-              onClick={() => onBookClass(train, selectedClass)}
-              className="flex items-center gap-1.5 rounded-lg bg-[var(--brand)] px-6 py-2.5 text-xs font-semibold text-white transition-all hover:bg-[var(--brand-hover)] active:scale-[0.98] shadow-sm cursor-pointer"
-            >
-              <span>Instant Book Class {selectedClass.classCode}</span>
-              <ArrowRight size={14} />
-            </button>
+            <div className="flex items-center gap-2">
+              <GroupBookingButton
+                mode="TRAIN"
+                selectedItem={{
+                  trainNumber: train.trainNumber,
+                  trainName: train.trainName,
+                  fromStation: train.fromStation,
+                  toStation: train.toStation,
+                  departureTime: train.departureTime,
+                  arrivalTime: train.arrivalTime,
+                  classCode: selectedClass.classCode,
+                }}
+                pricePerHead={allIn ? allInPrice(selectedClass.fare, "TRAIN") : selectedClass.fare}
+              />
+              <button
+                type="button"
+                onClick={() => onBookClass(train, selectedClass)}
+                className="flex items-center gap-1.5 rounded-lg bg-[var(--brand)] px-5 py-2.5 text-xs font-semibold text-white transition-all hover:bg-[var(--brand-hover)] active:scale-[0.98] shadow-sm cursor-pointer"
+              >
+                <span>Instant Book {selectedClass.classCode}</span>
+                <ArrowRight size={14} />
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { User, Wallet, Users, Plus, Shield, CheckCircle2 } from "lucide-react";
+import { User, Wallet, Users, Plus, Shield, CheckCircle2, Sparkles, SlidersHorizontal, Save } from "lucide-react";
 import { formatINR, formatDate } from "@/lib/utils/formatters";
 import Link from "next/link";
 
@@ -32,9 +32,74 @@ export default function ProfilePage() {
   const [formError, setFormError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  // Travel Personalization Profile State
+  const [preferredClass, setPreferredClass] = useState("3A");
+  const [preferredSeatType, setPreferredSeatType] = useState("WINDOW");
+  const [preferredBerthType, setPreferredBerthType] = useState("LOWER");
+  const [preferredBusType, setPreferredBusType] = useState("AC_SLEEPER");
+  const [mealPreference, setMealPreference] = useState("VEG");
+  const [budgetMax, setBudgetMax] = useState(8000);
+  const [preferredDepartTime, setPreferredDepartTime] = useState("MORNING");
+  const [homeAirport, setHomeAirport] = useState("DEL");
+  const [prefsSaved, setPrefsSaved] = useState(false);
+  const [savingPrefs, setSavingPrefs] = useState(false);
+
   useEffect(() => {
     fetchTravellers();
+    fetchPreferences();
   }, []);
+
+  async function fetchPreferences() {
+    try {
+      const res = await fetch("/api/preferences");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.preferences) {
+          const p = data.preferences;
+          if (p.preferredClass) setPreferredClass(p.preferredClass);
+          if (p.preferredSeatType) setPreferredSeatType(p.preferredSeatType);
+          if (p.preferredBerthType) setPreferredBerthType(p.preferredBerthType);
+          if (p.preferredBusType) setPreferredBusType(p.preferredBusType);
+          if (p.mealPreference) setMealPreference(p.mealPreference);
+          if (p.budgetMax) setBudgetMax(p.budgetMax);
+          if (p.preferredDepartTime) setPreferredDepartTime(p.preferredDepartTime);
+          if (p.homeAirport) setHomeAirport(p.homeAirport);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleSavePreferences(e: React.FormEvent) {
+    e.preventDefault();
+    setSavingPrefs(true);
+    setPrefsSaved(false);
+    try {
+      const res = await fetch("/api/preferences", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          preferredClass,
+          preferredSeatType,
+          preferredBerthType,
+          preferredBusType,
+          mealPreference,
+          budgetMax: Number(budgetMax),
+          preferredDepartTime,
+          homeAirport,
+        }),
+      });
+      if (res.ok) {
+        setPrefsSaved(true);
+        setTimeout(() => setPrefsSaved(false), 3000);
+      }
+    } catch {
+      alert("Error saving preferences");
+    } finally {
+      setSavingPrefs(false);
+    }
+  }
 
   async function fetchTravellers() {
     try {
@@ -307,6 +372,164 @@ export default function ProfilePage() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Persistent Travel Personalization Profile */}
+        <div id="preferences" className="rounded-xl border border-[var(--line)] bg-[var(--surface)] p-5 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--line)] pb-4 mb-5">
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-orange-50 text-[var(--brand)]">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-[var(--ink)]">
+                  Personal Travel Profile & Booking Intelligence
+                </h2>
+                <p className="text-xs text-[var(--ink-muted)]">
+                  Wayfare uses these explicit rules to auto-filter search results and highlight your preferred seats.
+                </p>
+              </div>
+            </div>
+
+            {prefsSaved && (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                Preferences Saved
+              </span>
+            )}
+          </div>
+
+          <form onSubmit={handleSavePreferences} className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
+              {/* Preferred Train Class */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-[var(--line)]/60 space-y-2">
+                <label className="font-mono font-bold uppercase tracking-wider text-[var(--ink)] block">
+                  Preferred Train Class
+                </label>
+                <div className="grid grid-cols-5 gap-1.5 font-mono">
+                  {["SL", "3A", "2A", "1A", "CC"].map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setPreferredClass(c)}
+                      className={`py-2 rounded-lg border text-center font-bold transition-all ${
+                        preferredClass === c
+                          ? "bg-[var(--brand)] text-white border-[var(--brand)] shadow-2xs"
+                          : "bg-white text-[var(--ink)] border-[var(--line)] hover:bg-slate-100"
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Preferred Seat Type */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-[var(--line)]/60 space-y-2">
+                <label className="font-mono font-bold uppercase tracking-wider text-[var(--ink)] block">
+                  Flight & Bus Seat Preference
+                </label>
+                <div className="grid grid-cols-3 gap-2 font-mono">
+                  {["WINDOW", "AISLE", "MIDDLE"].map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setPreferredSeatType(s)}
+                      className={`py-2 rounded-lg border text-center font-bold transition-all ${
+                        preferredSeatType === s
+                          ? "bg-[var(--brand)] text-white border-[var(--brand)] shadow-2xs"
+                          : "bg-white text-[var(--ink)] border-[var(--line)] hover:bg-slate-100"
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Preferred Train Berth */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-[var(--line)]/60 space-y-2">
+                <label className="font-mono font-bold uppercase tracking-wider text-[var(--ink)] block">
+                  Train Berth Allocation Preference
+                </label>
+                <select
+                  value={preferredBerthType}
+                  onChange={(e) => setPreferredBerthType(e.target.value)}
+                  className="w-full h-9 rounded-lg border border-[var(--line)] bg-white px-3 font-mono text-xs focus:ring-1 focus:ring-[var(--brand)] outline-none"
+                >
+                  <option value="LOWER">Lower Berth (Best for seniors / comfort)</option>
+                  <option value="SIDE_LOWER">Side Lower (Window view + privacy)</option>
+                  <option value="MIDDLE">Middle Berth</option>
+                  <option value="UPPER">Upper Berth</option>
+                  <option value="SIDE_UPPER">Side Upper</option>
+                </select>
+              </div>
+
+              {/* Preferred Bus Type */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-[var(--line)]/60 space-y-2">
+                <label className="font-mono font-bold uppercase tracking-wider text-[var(--ink)] block">
+                  Intercity Bus Comfort Tier
+                </label>
+                <select
+                  value={preferredBusType}
+                  onChange={(e) => setPreferredBusType(e.target.value)}
+                  className="w-full h-9 rounded-lg border border-[var(--line)] bg-white px-3 font-mono text-xs focus:ring-1 focus:ring-[var(--brand)] outline-none"
+                >
+                  <option value="AC_SLEEPER">AC Sleeper (2+1 / Multi-Axle)</option>
+                  <option value="AC_SEATER">AC Seater (BharatBenz / Volvo)</option>
+                  <option value="NON_AC_SLEEPER">Non-AC Sleeper</option>
+                  <option value="NON_AC_SEATER">Non-AC Seater</option>
+                </select>
+              </div>
+
+              {/* Meal & Time Band */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-[var(--line)]/60 space-y-2">
+                <label className="font-mono font-bold uppercase tracking-wider text-[var(--ink)] block">
+                  Dietary / Meal Preference
+                </label>
+                <select
+                  value={mealPreference}
+                  onChange={(e) => setMealPreference(e.target.value)}
+                  className="w-full h-9 rounded-lg border border-[var(--line)] bg-white px-3 font-mono text-xs focus:ring-1 focus:ring-[var(--brand)] outline-none"
+                >
+                  <option value="VEG">Standard Vegetarian</option>
+                  <option value="NON_VEG">Non-Vegetarian</option>
+                  <option value="JAIN">Strict Jain Meal (No root vegetables)</option>
+                  <option value="VEGAN">Vegan</option>
+                </select>
+              </div>
+
+              {/* Budget Ceiling & Home Airport */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-[var(--line)]/60 space-y-2">
+                <label className="font-mono font-bold uppercase tracking-wider text-[var(--ink)] block">
+                  Default Max Budget Filter (₹)
+                </label>
+                <div className="flex items-center gap-2 font-mono">
+                  <input
+                    type="number"
+                    min={500}
+                    max={50000}
+                    step={500}
+                    value={budgetMax}
+                    onChange={(e) => setBudgetMax(Number(e.target.value))}
+                    className="flex-1 h-9 rounded-lg border border-[var(--line)] bg-white px-3 text-xs focus:ring-1 focus:ring-[var(--brand)] outline-none font-bold"
+                  />
+                  <span className="text-[var(--ink-muted)] text-xs">INR Max</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--line)]">
+              <button
+                type="submit"
+                disabled={savingPrefs}
+                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-[var(--ink)] hover:bg-black text-white text-xs font-semibold transition-colors shadow-xs"
+              >
+                <Save className="w-3.5 h-3.5 text-orange-400" />
+                {savingPrefs ? "Saving Intelligence..." : "Save Travel Profile"}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

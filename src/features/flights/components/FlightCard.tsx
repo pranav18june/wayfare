@@ -3,12 +3,15 @@
 import { FlightResult } from "@/server/providers/types";
 import { formatINR, formatDuration } from "@/lib/utils/formatters";
 import { Luggage, Check, ArrowRight, ShieldCheck, Plane } from "lucide-react";
+import { allInPrice } from "@/lib/domain/pricing";
+import { GroupBookingButton } from "@/components/features/GroupBookingButton";
 
 interface FlightCardProps {
   flight: FlightResult;
   onSelect: (flight: FlightResult) => void;
   isSelected?: boolean;
   selectButtonLabel?: string;
+  allIn?: boolean;
 }
 
 export function FlightCard({
@@ -16,7 +19,11 @@ export function FlightCard({
   onSelect,
   isSelected = false,
   selectButtonLabel = "Book",
+  allIn = false,
 }: FlightCardProps) {
+  const displayFare = allIn
+    ? allInPrice(flight.calculatedFare, "FLIGHT")
+    : flight.calculatedFare;
   return (
     <div
       className={`rounded-xl border bg-[var(--surface)] p-5 transition-all shadow-card hover:shadow-card-hover ${
@@ -106,41 +113,52 @@ export function FlightCard({
         </div>
 
         {/* Price & Action Button */}
-        <div className="flex items-center justify-between sm:col-span-2 sm:flex-col sm:items-end sm:justify-center border-t sm:border-t-0 border-[var(--line)] pt-3 sm:pt-0">
+        <div className="flex items-center justify-between sm:col-span-2 sm:flex-col sm:items-end sm:justify-center border-t sm:border-t-0 border-[var(--line)] pt-3 sm:pt-0 gap-2">
           <div className="text-left sm:text-right">
             <div className="font-mono text-xl font-bold text-[var(--ink)]">
-              {formatINR(flight.calculatedFare)}
+              {formatINR(displayFare)}
             </div>
             <div className="text-[10px] text-[var(--ink-muted)] mt-0.5">
-              {flight.seatsLeft <= 5 ? (
+              {allIn ? (
+                <span className="text-emerald-700 font-semibold font-mono">All-in taxes & fees</span>
+              ) : flight.seatsLeft <= 5 ? (
                 <span className="text-rose-600 font-bold font-mono">Only {flight.seatsLeft} seats left</span>
               ) : (
-                <span>all taxes incl.</span>
+                <span>base fare excl. taxes</span>
               )}
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => onSelect(flight)}
-            className={`mt-2 flex items-center justify-center gap-1.5 rounded-lg px-5 py-2 text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer shadow-xs ${
-              isSelected
-                ? "bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)]"
-                : "bg-[var(--ink)] text-white hover:bg-black"
-            }`}
-          >
-            {isSelected ? (
-              <>
-                <Check size={14} />
-                <span>Selected</span>
-              </>
-            ) : (
-              <>
-                <span>{selectButtonLabel}</span>
-                <ArrowRight size={13} />
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-1.5 sm:flex-col sm:w-full sm:items-end">
+            <button
+              type="button"
+              onClick={() => onSelect(flight)}
+              className={`w-full flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer shadow-xs ${
+                isSelected
+                  ? "bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)]"
+                  : "bg-[var(--ink)] text-white hover:bg-black"
+              }`}
+            >
+              {isSelected ? (
+                <>
+                  <Check size={14} />
+                  <span>Selected</span>
+                </>
+              ) : (
+                <>
+                  <span>{selectButtonLabel}</span>
+                  <ArrowRight size={13} />
+                </>
+              )}
+            </button>
+
+            <GroupBookingButton
+              mode="FLIGHT"
+              selectedItem={flight}
+              pricePerHead={displayFare}
+              className="w-full"
+            />
+          </div>
         </div>
       </div>
     </div>

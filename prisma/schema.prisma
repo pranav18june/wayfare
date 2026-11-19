@@ -24,6 +24,9 @@ model User {
   walletTxns      WalletTransaction[]
   notifications   Notification[]
   recentSearches  RecentSearch[]
+  preferences     UserPreferences?
+  groupSessionsCreated GroupSession[]  @relation("GroupSessionCreator")
+  groupMemberships     GroupMember[]    @relation("GroupMemberUser")
 }
 
 model SavedTraveller {
@@ -419,4 +422,55 @@ model RecentSearch {
   createdAt  DateTime @default(now())
 
   @@index([userId])
+}
+
+model UserPreferences {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  preferredClass      String?  // SL | 3A | 2A | 1A | CC | ECONOMY | BUSINESS
+  preferredSeatType   String?  // WINDOW | AISLE | MIDDLE
+  preferredBerthType  String?  // LOWER | UPPER | MIDDLE | SIDE_LOWER | SIDE_UPPER
+  preferredBusType    String?  // AC_SLEEPER | NON_AC_SLEEPER | AC_SEATER | NON_AC_SEATER
+  mealPreference      String?  // VEG | NON_VEG | VEGAN | JAIN
+  budgetMin           Float?
+  budgetMax           Float?
+  preferredDepartTime String?  // EARLY_MORNING | MORNING | AFTERNOON | EVENING | NIGHT
+  homeCity            String?
+  homeAirport         String?
+  homeStation         String?
+  updatedAt           DateTime @updatedAt
+  createdAt           DateTime @default(now())
+}
+
+model GroupSession {
+  id           String        @id @default(cuid())
+  token        String        @unique @default(cuid())
+  creatorId    String
+  creator      User          @relation("GroupSessionCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  mode         String        // FLIGHT | TRAIN | BUS | HOTEL
+  searchParams String        // JSON snapshot of the search
+  selectedItem String        // JSON snapshot of the chosen flight/train/bus/hotel
+  pricePerHead Float
+  maxMembers   Int
+  status       String        @default("OPEN") // OPEN | LOCKED | COMPLETED | EXPIRED
+  expiresAt    DateTime
+  members      GroupMember[]
+  createdAt    DateTime      @default(now())
+}
+
+model GroupMember {
+  id             String       @id @default(cuid())
+  sessionId      String
+  session        GroupSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  userId         String?      // null if guest joined via link
+  user           User?        @relation("GroupMemberUser", fields: [userId], references: [id])
+  name           String
+  email          String
+  passengersJson String       @default("[]") // JSON array of passenger details they submitted
+  paymentStatus  String       @default("PENDING") // PENDING | PAID | REFUNDED
+  bookingId      String?      // linked booking after payment
+  joinedAt       DateTime     @default(now())
+
+  @@index([sessionId])
 }

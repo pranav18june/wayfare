@@ -12,6 +12,7 @@ import {
   Wallet,
   Bell,
   User,
+  Users,
   LogOut,
   Shield,
   Menu,
@@ -124,11 +125,37 @@ export function Header() {
                 <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[var(--brand)] ring-2 ring-white" />
               </Link>
 
+              {/* Live Journey Trip Mode */}
+              <Link
+                href="/trips/live"
+                className={`hidden rounded-md px-2.5 py-1 text-xs font-medium transition-colors lg:inline-flex items-center gap-1.5 ${
+                  pathname.startsWith("/trips/live")
+                    ? "bg-[var(--ink)] text-white font-semibold"
+                    : "text-[var(--ink-muted)] hover:bg-[var(--canvas)] hover:text-[var(--ink)]"
+                }`}
+                title="Day-of Journey Companion"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--brand)] animate-pulse" />
+                Trip Mode
+              </Link>
+
+              {/* Group Trips */}
+              <Link
+                href="/group"
+                className={`hidden rounded-md px-2.5 py-1 text-xs font-medium transition-colors sm:inline-block ${
+                  pathname.startsWith("/group")
+                    ? "bg-[var(--canvas)] text-[var(--ink)] font-semibold"
+                    : "text-[var(--ink-muted)] hover:bg-[var(--canvas)] hover:text-[var(--ink)]"
+                }`}
+              >
+                Group Split
+              </Link>
+
               {/* My Trips */}
               <Link
                 href="/trips"
                 className={`hidden rounded-md px-2.5 py-1 text-xs font-medium transition-colors sm:inline-block ${
-                  pathname.startsWith("/trips")
+                  pathname.startsWith("/trips") && !pathname.startsWith("/trips/live")
                     ? "bg-[var(--canvas)] text-[var(--ink)] font-semibold"
                     : "text-[var(--ink-muted)] hover:bg-[var(--canvas)] hover:text-[var(--ink)]"
                 }`}
@@ -232,6 +259,22 @@ export function Header() {
             >
               <Activity size={15} />
               <span>Live Train Running Status</span>
+            </Link>
+            <Link
+              href="/trips/live"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2 p-2 text-xs font-medium text-[var(--brand)] hover:bg-orange-50 rounded"
+            >
+              <span className="w-2 h-2 rounded-full bg-[var(--brand)] animate-pulse" />
+              <span>Live Trip Mode (Day-of Travel)</span>
+            </Link>
+            <Link
+              href="/group"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2 p-2 text-xs font-medium text-[var(--ink-muted)] hover:text-[var(--ink)]"
+            >
+              <Users size={15} />
+              <span>Group Bookings & Split Trips</span>
             </Link>
             <Link
               href="/trips"

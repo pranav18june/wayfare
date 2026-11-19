@@ -5,6 +5,8 @@ import { BusResult, BusSeat } from "@/server/providers/types";
 import { SeatLayoutPicker } from "./SeatLayoutPicker";
 import { formatINR, formatDuration } from "@/lib/utils/formatters";
 import { Bus, Star, ChevronDown, ChevronUp, Clock, MapPin } from "lucide-react";
+import { allInPrice } from "@/lib/domain/pricing";
+import { GroupBookingButton } from "@/components/features/GroupBookingButton";
 
 interface BusCardProps {
   bus: BusResult;
@@ -15,9 +17,11 @@ interface BusCardProps {
     boarding: string,
     dropping: string
   ) => void;
+  allIn?: boolean;
 }
 
-export function BusCard({ bus, date, onProceedCheckout }: BusCardProps) {
+export function BusCard({ bus, date, onProceedCheckout, allIn = false }: BusCardProps) {
+  const displayPrice = allIn ? allInPrice(bus.baseFare, "BUS") : bus.baseFare;
   const [expanded, setExpanded] = useState(false);
   const [seats, setSeats] = useState<BusSeat[]>([]);
   const [loadingSeats, setLoadingSeats] = useState(false);
@@ -104,28 +108,43 @@ export function BusCard({ bus, date, onProceedCheckout }: BusCardProps) {
         </div>
 
         {/* Price & Select Seats CTA */}
-        <div className="flex items-center justify-between sm:col-span-3 sm:flex-col sm:items-end sm:justify-center border-t sm:border-t-0 border-[var(--line)] pt-3 sm:pt-0">
+        <div className="flex items-center justify-between sm:col-span-3 sm:flex-col sm:items-end sm:justify-center border-t sm:border-t-0 border-[var(--line)] pt-3 sm:pt-0 gap-2">
           <div className="text-left sm:text-right">
             <div className="font-mono text-xl font-bold text-[var(--ink)]">
-              {formatINR(bus.baseFare)}
+              {formatINR(displayPrice)}
             </div>
             <div className="text-[10px] text-[var(--ink-muted)] mt-0.5 font-mono">
-              <span className="text-emerald-700 font-bold">{bus.seatsLeft} seats</span> available
+              {allIn ? (
+                <span className="text-emerald-700 font-semibold font-mono">GST & toll charges incl.</span>
+              ) : (
+                <span>
+                  <strong className="text-emerald-700 font-bold">{bus.seatsLeft} seats</strong> available
+                </span>
+              )}
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={handleToggleSeats}
-            className={`mt-2 flex items-center gap-1.5 rounded-lg px-5 py-2 text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer shadow-xs ${
-              expanded
-                ? "bg-[var(--ink)] text-white hover:bg-black"
-                : "bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)]"
-            }`}
-          >
-            <span>{expanded ? "Hide Deck Map" : "Select Seats"}</span>
-            {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-          </button>
+          <div className="flex items-center gap-1.5 sm:flex-col sm:w-full sm:items-end">
+            <button
+              type="button"
+              onClick={handleToggleSeats}
+              className={`w-full flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition-all active:scale-[0.98] cursor-pointer shadow-xs ${
+                expanded
+                  ? "bg-[var(--ink)] text-white hover:bg-black"
+                  : "bg-[var(--brand)] text-white hover:bg-[var(--brand-hover)]"
+              }`}
+            >
+              <span>{expanded ? "Hide Deck Map" : "Select Seats"}</span>
+              {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+            </button>
+
+            <GroupBookingButton
+              mode="BUS"
+              selectedItem={bus}
+              pricePerHead={displayPrice}
+              className="w-full"
+            />
+          </div>
         </div>
       </div>
 

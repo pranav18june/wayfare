@@ -10,6 +10,7 @@ import { formatDate } from "@/lib/utils/formatters";
 import { differenceInDays, parseISO } from "date-fns";
 import { ArrowLeft, Filter, Building2, X } from "lucide-react";
 import Link from "next/link";
+import { AllInPriceToggle } from "@/components/features/AllInPriceToggle";
 
 function HotelResultsContent() {
   const searchParams = useSearchParams();
@@ -19,6 +20,7 @@ function HotelResultsContent() {
   const checkOut = searchParams.get("checkOut") || "2026-11-22";
   const guests = parseInt(searchParams.get("guests") || "2", 10);
   const rooms = parseInt(searchParams.get("rooms") || "1", 10);
+  const allIn = searchParams.get("allin") === "1";
 
   // Nights count calculation
   const nights = useMemo(() => {
@@ -200,14 +202,17 @@ function HotelResultsContent() {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setMobileFilterOpen(true)}
-          className="flex items-center gap-1.5 rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] md:hidden self-start"
-        >
-          <Filter size={14} />
-          <span>Filters</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <AllInPriceToggle />
+          <button
+            type="button"
+            onClick={() => setMobileFilterOpen(true)}
+            className="flex items-center gap-1.5 rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] md:hidden"
+          >
+            <Filter size={14} />
+            <span>Filters</span>
+          </button>
+        </div>
       </div>
 
       <div className="flex items-start gap-6">
@@ -270,6 +275,7 @@ function HotelResultsContent() {
                   checkIn={checkIn}
                   checkOut={checkOut}
                   nights={nights}
+                  allIn={allIn}
                 />
               ))}
             </div>

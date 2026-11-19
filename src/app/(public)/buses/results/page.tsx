@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { formatDate } from "@/lib/utils/formatters";
 import { ArrowLeft, Filter, Bus, X } from "lucide-react";
 import Link from "next/link";
+import { AllInPriceToggle } from "@/components/features/AllInPriceToggle";
 
 function BusResultsContent() {
   const router = useRouter();
@@ -17,6 +18,7 @@ function BusResultsContent() {
   const from = searchParams.get("from") || "New Delhi";
   const to = searchParams.get("to") || "Jaipur";
   const date = searchParams.get("date") || "2026-11-20";
+  const allIn = searchParams.get("allin") === "1";
 
   const [buses, setBuses] = useState<BusResult[]>([]);
   const [loading, setLoading] = useState(true);
@@ -255,14 +257,17 @@ function BusResultsContent() {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setMobileFilterOpen(true)}
-          className="flex items-center gap-1.5 rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] md:hidden self-start"
-        >
-          <Filter size={14} />
-          <span>Filters</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <AllInPriceToggle />
+          <button
+            type="button"
+            onClick={() => setMobileFilterOpen(true)}
+            className="flex items-center gap-1.5 rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] md:hidden"
+          >
+            <Filter size={14} />
+            <span>Filters</span>
+          </button>
+        </div>
       </div>
 
       <div className="flex items-start gap-6">
@@ -326,6 +331,7 @@ function BusResultsContent() {
                   bus={bus}
                   date={date}
                   onProceedCheckout={handleProceedCheckout}
+                  allIn={allIn}
                 />
               ))}
             </div>

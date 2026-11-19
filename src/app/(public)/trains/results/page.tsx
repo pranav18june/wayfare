@@ -9,6 +9,8 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { formatDate } from "@/lib/utils/formatters";
 import { ArrowLeft, Filter, Train as TrainIcon, X } from "lucide-react";
 import Link from "next/link";
+import { AllInPriceToggle } from "@/components/features/AllInPriceToggle";
+import { PersonalizationBadge } from "@/components/features/PersonalizationBadge";
 
 function TrainResultsContent() {
   const router = useRouter();
@@ -19,6 +21,7 @@ function TrainResultsContent() {
   const date = searchParams.get("date") || "2026-11-24";
   const classFilter = searchParams.get("class") || "ALL";
   const quota = searchParams.get("quota") || "GN";
+  const allIn = searchParams.get("allin") === "1";
 
   const [trains, setTrains] = useState<TrainResult[]>([]);
   const [loading, setLoading] = useState(true);
@@ -218,24 +221,28 @@ function TrainResultsContent() {
             <h1 className="text-base font-bold text-[var(--ink)]">
               {from} <span className="text-[var(--ink-muted)]">→</span> {to}
             </h1>
-            <div className="flex items-center gap-2 text-xs text-[var(--ink-muted)] font-mono">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--ink-muted)] font-mono mt-1">
               <span>{formatDate(date, "EEE, d MMM yyyy")}</span>
               <span>•</span>
               <span>Quota: {quota}</span>
               <span>•</span>
               <span>Class: {classFilter}</span>
+              <PersonalizationBadge />
             </div>
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setMobileFilterOpen(true)}
-          className="flex items-center gap-1.5 rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] md:hidden self-start"
-        >
-          <Filter size={14} />
-          <span>Filters</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <AllInPriceToggle />
+          <button
+            type="button"
+            onClick={() => setMobileFilterOpen(true)}
+            className="flex items-center gap-1.5 rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] md:hidden"
+          >
+            <Filter size={14} />
+            <span>Filters</span>
+          </button>
+        </div>
       </div>
 
       <div className="flex items-start gap-6">
@@ -300,6 +307,7 @@ function TrainResultsContent() {
                   searchDate={date}
                   quota={quota}
                   onBookClass={handleBookClass}
+                  allIn={allIn}
                 />
               ))}
             </div>

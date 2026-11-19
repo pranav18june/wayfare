@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calculateFare } from "../pricing";
+import { calculateFare, allInPrice } from "../pricing";
 import { calculateRefund } from "../refunds";
 import { estimateTrainConfirmationProbability } from "../availability";
 import { formatINR, formatTime, formatDuration } from "@/lib/utils/formatters";
@@ -57,6 +57,17 @@ describe("Domain: Pricing & Fare Calculation", () => {
       passengerCount: 0,
     });
     expect(res2.ok).toBe(false);
+  });
+
+  it("calculates accurate all-in transparent pricing with taxes and fees", () => {
+    // Flight: 4000 base + 12% (480) + 250 fee = 4730
+    expect(allInPrice(4000, "FLIGHT", false)).toBe(4730);
+    // Flight with baggage: 4000 + 480 + 250 + 350 = 5080
+    expect(allInPrice(4000, "FLIGHT", true)).toBe(5080);
+    // Train: 1000 base + 5% (50) + 50 fee = 1100
+    expect(allInPrice(1000, "TRAIN")).toBe(1100);
+    // Bus: 600 base + 5% (30) + 40 fee = 670
+    expect(allInPrice(600, "BUS")).toBe(670);
   });
 });
 

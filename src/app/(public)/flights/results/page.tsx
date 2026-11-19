@@ -16,6 +16,8 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { Filter, ArrowLeft, Plane, PlaneTakeoff, PlaneLanding } from "lucide-react";
 import Link from "next/link";
 import { formatDate } from "@/lib/utils/formatters";
+import { AllInPriceToggle } from "@/components/features/AllInPriceToggle";
+import { PersonalizationBadge } from "@/components/features/PersonalizationBadge";
 
 function FlightsResultsContent() {
   const router = useRouter();
@@ -32,6 +34,7 @@ function FlightsResultsContent() {
 
   const totalPassengers = adults + children + infants;
   const isRoundTrip = Boolean(returnDate);
+  const allIn = searchParams.get("allin") === "1";
 
   // Active view for round trip: "OUTBOUND" or "RETURN"
   const [activeLeg, setActiveLeg] = useState<"OUTBOUND" | "RETURN">("OUTBOUND");
@@ -265,7 +268,7 @@ function FlightsResultsContent() {
                 </span>
               )}
             </h1>
-            <div className="flex items-center gap-2 text-xs text-[var(--ink-muted)] font-mono">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--ink-muted)] font-mono mt-1">
               <span>{formatDate(date, "EEE, d MMM")}</span>
               {returnDate && (
                 <>
@@ -279,19 +282,23 @@ function FlightsResultsContent() {
               </span>
               <span>•</span>
               <span>{cabin}</span>
+              <PersonalizationBadge />
             </div>
           </div>
         </div>
 
-        {/* Mobile filter trigger */}
-        <button
-          type="button"
-          onClick={() => setMobileFilterOpen(true)}
-          className="flex items-center gap-1.5 rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] md:hidden self-start"
-        >
-          <Filter size={14} />
-          <span>Filters & Sort</span>
-        </button>
+        {/* Mobile filter trigger & All-In Toggle */}
+        <div className="flex items-center gap-2">
+          <AllInPriceToggle />
+          <button
+            type="button"
+            onClick={() => setMobileFilterOpen(true)}
+            className="flex items-center gap-1.5 rounded-md border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] md:hidden"
+          >
+            <Filter size={14} />
+            <span>Filters & Sort</span>
+          </button>
+        </div>
       </div>
 
       {/* Round-trip leg switcher tab */}
@@ -407,6 +414,7 @@ function FlightsResultsContent() {
                     isSelected={isSelected}
                     selectButtonLabel={isRoundTrip ? "Select Leg" : "Book"}
                     onSelect={handleFlightSelect}
+                    allIn={allIn}
                   />
                 );
               })}

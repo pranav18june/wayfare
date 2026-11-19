@@ -8,6 +8,7 @@ import { BusSearchForm } from "@/features/buses/components/BusSearchForm";
 import { HotelSearchForm } from "@/features/hotels/components/HotelSearchForm";
 import { PNRQuickCheck } from "@/features/trains/components/PNRQuickCheck";
 import { LiveRunningQuickCheck } from "@/features/trains/components/LiveRunningQuickCheck";
+import { TravelDayBanner } from "@/components/features/TravelDayBanner";
 import {
   Tag,
   ArrowRight,
@@ -56,7 +57,10 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 space-y-10">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 space-y-8">
+      {/* Travel Day Live Journey Banner (shows if trip is departing today/tomorrow) */}
+      <TravelDayBanner />
+
       {/* Network Ticker */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--line)] pb-4 text-xs font-mono text-[var(--ink-muted)]">
         <div className="flex items-center gap-2">

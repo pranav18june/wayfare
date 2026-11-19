@@ -94,3 +94,20 @@ export function calculateFare(input: PricingInput): Result<FareBreakdown> {
     promoCode: appliedCode,
   });
 }
+
+/**
+ * Calculates all-in transparent price (base + taxes + convenience fee + optional baggage)
+ */
+export function allInPrice(
+  baseFare: number,
+  mode: TravelMode = "FLIGHT",
+  includeBaggage = false
+): number {
+  if (baseFare <= 0) return 0;
+  const taxRate = TAX_RATES[mode] || 0.05;
+  const convenience = CONVENIENCE_FEES[mode] || 50;
+  const taxes = Math.round(baseFare * taxRate);
+  const baggage = mode === "FLIGHT" && includeBaggage ? 350 : 0;
+  return Math.round(baseFare + taxes + convenience + baggage);
+}
+
